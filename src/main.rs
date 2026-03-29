@@ -14,6 +14,8 @@ fn main() -> eframe::Result<()> {
             // Set black and white theme
             let mut visuals = egui::Visuals::dark();
 
+            visuals.override_text_color = Some(egui::Color32::WHITE);
+
             // strictly black and white
             visuals.window_fill = egui::Color32::BLACK;
             visuals.panel_fill = egui::Color32::BLACK;
@@ -52,9 +54,11 @@ struct MyApp {
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, frame: &mut eframe::Frame) {
         #[allow(deprecated)]
-        egui::CentralPanel::default().show(ctx, |ui| {
-            self.ui(ui, frame);
-        });
+        egui::CentralPanel::default()
+            .frame(egui::Frame::central_panel(&ctx.style()).fill(egui::Color32::BLACK))
+            .show(ctx, |ui| {
+                self.ui(ui, frame);
+            });
     }
 
     fn clear_color(&self, _visuals: &egui::Visuals) -> [f32; 4] {
