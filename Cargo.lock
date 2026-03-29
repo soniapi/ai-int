@@ -181,6 +181,9 @@ name = "app"
 version = "0.1.0"
 dependencies = [
  "eframe",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
