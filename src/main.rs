@@ -1,5 +1,6 @@
 use eframe::egui;
 
+#[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -10,39 +11,66 @@ fn main() -> eframe::Result<()> {
     eframe::run_native(
         "Microstructure Variable Selector",
         options,
-        Box::new(|cc| {
-            // Set black and white theme
-            let mut visuals = egui::Visuals::dark();
-
-            visuals.override_text_color = Some(egui::Color32::WHITE);
-
-            // strictly black and white
-            visuals.window_fill = egui::Color32::BLACK;
-            visuals.panel_fill = egui::Color32::BLACK;
-
-            visuals.widgets.noninteractive.bg_fill = egui::Color32::BLACK;
-            visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-
-            visuals.widgets.inactive.bg_fill = egui::Color32::BLACK;
-            visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-            visuals.widgets.inactive.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-
-            visuals.widgets.hovered.bg_fill = egui::Color32::BLACK;
-            visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-            visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-
-            visuals.widgets.active.bg_fill = egui::Color32::WHITE;
-            visuals.widgets.active.fg_stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
-            visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
-
-            visuals.selection.bg_fill = egui::Color32::WHITE;
-            visuals.selection.stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
-
-            cc.egui_ctx.set_visuals(visuals);
-
-            Ok(Box::new(MyApp::default()))
-        }),
+        Box::new(|cc| Ok(setup_app(cc))),
     )
+}
+
+#[cfg(target_arch = "wasm32")]
+use wasm_bindgen::prelude::*;
+
+#[cfg(target_arch = "wasm32")]
+#[wasm_bindgen]
+pub async fn start(canvas_id: &str) -> Result<(), wasm_bindgen::JsValue> {
+    let web_options = eframe::WebOptions::default();
+
+    let window = web_sys::window().expect("no global `window` exists");
+    let document = window.document().expect("should have a document on window");
+    let canvas = document.get_element_by_id(canvas_id).expect("canvas id not found");
+    let canvas = canvas.dyn_into::<web_sys::HtmlCanvasElement>().expect("canvas is not a HtmlCanvasElement");
+
+    eframe::WebRunner::new()
+        .start(
+            canvas,
+            web_options,
+            Box::new(|cc| Ok(setup_app(cc))),
+        )
+        .await
+}
+
+#[cfg(target_arch = "wasm32")]
+fn main() {}
+
+fn setup_app(cc: &eframe::CreationContext<'_>) -> Box<dyn eframe::App> {
+    // Set black and white theme
+    let mut visuals = egui::Visuals::dark();
+
+    visuals.override_text_color = Some(egui::Color32::WHITE);
+
+    // strictly black and white
+    visuals.window_fill = egui::Color32::BLACK;
+    visuals.panel_fill = egui::Color32::BLACK;
+
+    visuals.widgets.noninteractive.bg_fill = egui::Color32::BLACK;
+    visuals.widgets.noninteractive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+
+    visuals.widgets.inactive.bg_fill = egui::Color32::BLACK;
+    visuals.widgets.inactive.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+    visuals.widgets.inactive.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+
+    visuals.widgets.hovered.bg_fill = egui::Color32::BLACK;
+    visuals.widgets.hovered.fg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+    visuals.widgets.hovered.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+
+    visuals.widgets.active.bg_fill = egui::Color32::WHITE;
+    visuals.widgets.active.fg_stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
+    visuals.widgets.active.bg_stroke = egui::Stroke::new(1.0, egui::Color32::WHITE);
+
+    visuals.selection.bg_fill = egui::Color32::WHITE;
+    visuals.selection.stroke = egui::Stroke::new(1.0, egui::Color32::BLACK);
+
+    cc.egui_ctx.set_visuals(visuals);
+
+    Box::new(MyApp::default())
 }
 
 #[derive(Default)]
