@@ -3,7 +3,8 @@ use eframe::egui;
 fn main() -> eframe::Result<()> {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_inner_size([500.0, 200.0]),
+            .with_inner_size([500.0, 200.0])
+            .with_transparent(false),
         ..Default::default()
     };
     eframe::run_native(
